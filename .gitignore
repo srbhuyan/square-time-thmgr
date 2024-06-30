@@ -1,5 +1,6 @@
 squaretime_serial
 squaretime_parallel
+.repoid
 *.zst
 *.csv
 *.pdf

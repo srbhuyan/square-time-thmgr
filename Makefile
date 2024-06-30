@@ -1,10 +1,10 @@
 all: serial parallel
 
 serial:
-	gcc -std=c99 -o squaretime_serial squaretime_serial.c
+	gcc -std=c99 -o main_serial main_serial.c
 
 parallel:
-	gcc -std=c99 -o squaretime_parallel squaretime_parallel.c -lpthread
+	gcc -std=c99 -o main_parallel main_parallel.c -lpthread
 
 clean:
-	rm squaretime_serial squaretime_parallel
+	rm main_serial main_parallel
