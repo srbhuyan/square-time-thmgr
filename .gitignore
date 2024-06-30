@@ -1,0 +1,7 @@
+squaretime_serial
+squaretime_parallel
+*.zst
+*.csv
+*.pdf
+*.json
+
