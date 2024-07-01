@@ -102,10 +102,14 @@ for i in "${!space_parallel[@]}"; do
   fi
 done
 
-jo -p iva=$(jo -a ${iva[@]}) time=$(jo -a ${time_serial[@]}) > time-serial.json
-jo -p iva=$(jo -a ${core[@]}) time=$(jo -a ${time_parallel[@]}) > time-parallel.json
-jo -p iva=$(jo -a ${iva[@]}) time=$(jo -a ${space_serial[@]}) > space-serial.json
-jo -p iva=$(jo -a ${core[@]}) time=$(jo -a ${space_parallel[@]}) > space-parallel.json
+jo -p iva=$(jo name=$iva_name values=$(jo -a ${iva[@]})) \
+measurements=$(jo -a ${time_serial[@]}) > time-serial.json
+jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
+measurements=$(jo -a ${time_parallel[@]}) > time-parallel.json
+jo -p iva=$(jo name=$iva_name values=$(jo -a ${iva[@]})) \
+measurements=$(jo -a ${space_serial[@]}) > space-serial.json
+jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
+measurements=$(jo -a ${space_parallel[@]}) > space-parallel.json
 
 # curve fitting
 fit.py --in-file time-serial.json --out-file time-serial-fitted.json
@@ -117,7 +121,7 @@ fit.py --in-file space-parallel.json --out-file space-parallel-fitted.json
 jo -p \
 iva=$(jo data=$(jo -a ${iva[@]}) name=$iva_name unit=size) \
 measurements=$(jo data=$(jo -a ${time_serial[@]}) name=time unit=seconds) \
-predictions=$(jo data="`jq '.fitted_time' time-serial-fitted.json`" name=time unit=seconds) \
+predictions=$(jo data="`jq '.fitted_measurements' time-serial-fitted.json`" name=time unit=seconds) \
 polynomial="`jq '.polynomial' time-serial-fitted.json`" \
 maxError="`jq '.max_error' time-serial-fitted.json`" \
 > $time_serial_analytics_file
@@ -126,7 +130,7 @@ maxError="`jq '.max_error' time-serial-fitted.json`" \
 jo -p \
 iva=$(jo data=$(jo -a ${core[@]}) name=core unit=count) \
 measurements=$(jo data=$(jo -a ${time_parallel[@]}) name=time unit=seconds) \
-predictions=$(jo data="`jq '.fitted_time' time-parallel-fitted.json`" name=time unit=seconds) \
+predictions=$(jo data="`jq '.fitted_measurements' time-parallel-fitted.json`" name=time unit=seconds) \
 polynomial="`jq '.polynomial' time-parallel-fitted.json`" \
 maxError="`jq '.max_error' time-parallel-fitted.json`" \
 > $time_parallel_analytics_file
@@ -135,7 +139,7 @@ maxError="`jq '.max_error' time-parallel-fitted.json`" \
 jo -p \
 iva=$(jo data=$(jo -a ${iva[@]}) name=$iva_name unit=size) \
 measurements=$(jo data=$(jo -a ${space_serial[@]}) name=memory unit=MB) \
-predictions=$(jo data="`jq '.fitted_time' space-serial-fitted.json`" name=memory unit=MB) \
+predictions=$(jo data="`jq '.fitted_measurements' space-serial-fitted.json`" name=memory unit=MB) \
 polynomial="`jq '.polynomial' space-serial-fitted.json`" \
 maxError="`jq '.max_error' space-serial-fitted.json`" \
 > $space_serial_analytics_file
@@ -144,7 +148,7 @@ maxError="`jq '.max_error' space-serial-fitted.json`" \
 jo -p \
 iva=$(jo data=$(jo -a ${core[@]}) name=core unit=count) \
 measurements=$(jo data=$(jo -a ${space_parallel[@]}) name=memory unit=MB) \
-predictions=$(jo data="`jq '.fitted_time' space-parallel-fitted.json`" name=memory unit=MB) \
+predictions=$(jo data="`jq '.fitted_measurements' space-parallel-fitted.json`" name=memory unit=MB) \
 polynomial="`jq '.polynomial' space-parallel-fitted.json`" \
 maxError="`jq '.max_error' space-parallel-fitted.json`" \
 > $space_parallel_analytics_file

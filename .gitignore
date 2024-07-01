@@ -1,5 +1,5 @@
-squaretime_serial
-squaretime_parallel
+main_serial
+main_parallel
 .repoid
 *.zst
 *.csv
