@@ -6,8 +6,8 @@ usage()
   exit 1
 }
 
-if [ "$#" -ne 12 ]; then
-    echo "Invalid number of parameters. Expected:12 Passed:$#"
+if [ "$#" -ne 13 ]; then
+    echo "Invalid number of parameters. Expected:13 Passed:$#"
     usage
 fi
 
@@ -23,6 +23,7 @@ space_serial_analytics_file=$9
 space_parallel_analytics_file=${10}
 speedup_analytics_file=${11}
 freeup_analytics_file=${12}
+powerup_analytics_file=${13}
 
 serial_measurement=serial.csv
 parallel_measurement=parallel.csv
@@ -32,6 +33,9 @@ rm $time_serial_analytics_file 2> /dev/null
 rm $time_parallel_analytics_file 2> /dev/null
 rm $space_serial_analytics_file 2> /dev/null
 rm $space_parallel_analytics_file 2> /dev/null
+rm $speedup_analytics_file 2> /dev/null
+rm $freeup_analytics_file 2> /dev/null
+rm $powerup_analytics_file 2> /dev/null
 rm $serial_measurement 2> /dev/null
 rm $parallel_measurement 2> /dev/null
 
@@ -45,13 +49,19 @@ make
 count=1
 for i in ${iva[@]}
 do
+  # time, memory
   start=`date +%s.%N`;\
   heaptrack -o "$serial_algo.$count" ./$serial_algo $i;\
   end=`date +%s.%N`;\
   time_serial=`printf '%.8f' $( echo "$end - $start" | bc -l )`;\
   memory_serial=`heaptrack --analyze "$serial_algo.$count.zst"  | grep "peak heap memory consumption" | awk '{print $5}'`;
 
-  echo "$i,$time_serial,$memory_serial" >> "$serial_measurement"
+  # power, energy
+  ./$serial_algo $i && \
+  power=`ipmimonitoring | grep "PW consumption" | awk '{print $13}'`; \
+  energy=`echo "tm=$time_serial;pw=$power;tm * pw" | bc`;
+
+  echo "$i,$time_serial,$memory_serial,$power,$energy" >> "$serial_measurement"
   count=$((count+1))
 done
 
@@ -59,13 +69,19 @@ done
 count=1
 for i in ${core[@]}
 do
+  # time, memory
   start=`date +%s.%N`;\
   heaptrack -o "$parallel_algo.$count" ./$parallel_algo $iva_data $i;\
   end=`date +%s.%N`;\
   time_parallel=`printf '%.8f' $( echo "$end - $start" | bc -l )`;\
   memory_parallel=`heaptrack --analyze "$parallel_algo.$count.zst"  | grep "peak heap memory consumption" | awk '{print $5}'`;
 
-  echo "$i,$time_parallel,$memory_parallel" >> "$parallel_measurement"
+  # power, energy
+  ./$parallel_algo $iva_data $i && \
+  power=`ipmimonitoring | grep "PW consumption" | awk '{print $13}'`; \
+  energy=`echo "pw=$power;tm=$time_parallel;pw * tm" | bc`;
+
+  echo "$i,$time_parallel,$memory_parallel,$power,$energy" >> "$parallel_measurement"
   count=$((count+1))
 done
 
@@ -76,13 +92,14 @@ time_serial=()
 space_serial=()
 time_parallel=()
 space_parallel=()
+energy_parallel=()
 
-while IFS=, read -r i t s;
+while IFS=, read -r i t s p e;
 do iva+=($i) time_serial+=($t) space_serial+=($s);
 done < $serial_measurement
 
-while IFS=, read -r i t s;
-do core+=($i) time_parallel+=($t) space_parallel+=($s);
+while IFS=, read -r i t s p e;
+do core+=($i) time_parallel+=($t) space_parallel+=($s) energy_parallel+=($e);
 done < $parallel_measurement
 
 # data prep
@@ -118,6 +135,13 @@ for s in "${space_parallel[@]}"; do
   freeup+=(`echo "scale=2;$s_max/$s" | bc`)
 done
 
+# powerup
+powerup=()
+e_1=${energy_parallel[0]}
+for e_core in "${energy_parallel[@]}"; do
+  powerup+=(`echo "scale=4;$e_1/$e_core" | bc`)
+done
+
 jo -p iva=$(jo name=$iva_name values=$(jo -a ${iva[@]})) \
 measurements=$(jo -a ${time_serial[@]}) > time-serial.json
 jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
@@ -130,6 +154,8 @@ jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
 measurements=$(jo -a ${speedup[@]}) > speedup.json
 jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
 measurements=$(jo -a ${freeup[@]}) > freeup.json
+jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
+measurements=$(jo -a ${powerup[@]}) > powerup.json
 
 # curve fitting
 fit.py --in-file time-serial.json --out-file time-serial-fitted.json
@@ -138,6 +164,7 @@ fit.py --in-file space-serial.json --out-file space-serial-fitted.json
 fit.py --in-file space-parallel.json --out-file space-parallel-fitted.json
 fit.py --in-file speedup.json --out-file speedup-fitted.json
 fit.py --in-file freeup.json --out-file freeup-fitted.json
+fit.py --in-file powerup.json --out-file powerup-fitted.json
 
 # time serial
 jo -p \
@@ -192,4 +219,13 @@ predictions=$(jo data="`jq '.fitted_measurements' freeup-fitted.json`" name='Sma
 polynomial="`jq '.polynomial' freeup-fitted.json`" \
 maxError="`jq '.max_error' freeup-fitted.json`" \
 > $freeup_analytics_file
+
+# powerup
+jo -p \
+iva=$(jo data=$(jo -a ${core[@]}) name=core unit=count) \
+measurements=$(jo data=$(jo -a ${powerup[@]}) name='E1/Ecore' unit='') \
+predictions=$(jo data="`jq '.fitted_measurements' powerup-fitted.json`" name='E1/Ecore' unit='') \
+polynomial="`jq '.polynomial' powerup-fitted.json`" \
+maxError="`jq '.max_error' powerup-fitted.json`" \
+> $powerup_analytics_file
 
