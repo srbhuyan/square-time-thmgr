@@ -205,8 +205,8 @@ maxError="`jq '.max_error' space-parallel-fitted.json`" \
 # speedup
 jo -p \
 iva=$(jo data=$(jo -a ${core[@]}) name=core unit=count) \
-measurements=$(jo data=$(jo -a ${speedup[@]}) name='Tmax/T' unit='') \
-predictions=$(jo data="`jq '.fitted_measurements' speedup-fitted.json`" name='Tmax/T' unit='') \
+measurements=$(jo data=$(jo -a ${speedup[@]}) name='T1/Tcore' unit='') \
+predictions=$(jo data="`jq '.fitted_measurements' speedup-fitted.json`" name='T1/Tcore' unit='') \
 polynomial="`jq '.polynomial' speedup-fitted.json`" \
 maxError="`jq '.max_error' speedup-fitted.json`" \
 > $speedup_analytics_file
@@ -214,8 +214,8 @@ maxError="`jq '.max_error' speedup-fitted.json`" \
 # freeup
 jo -p \
 iva=$(jo data=$(jo -a ${core[@]}) name=core unit=count) \
-measurements=$(jo data=$(jo -a ${freeup[@]}) name='Smax/S' unit='') \
-predictions=$(jo data="`jq '.fitted_measurements' freeup-fitted.json`" name='Smax/S' unit='') \
+measurements=$(jo data=$(jo -a ${freeup[@]}) name='S1/Score' unit='') \
+predictions=$(jo data="`jq '.fitted_measurements' freeup-fitted.json`" name='S1/Score' unit='') \
 polynomial="`jq '.polynomial' freeup-fitted.json`" \
 maxError="`jq '.max_error' freeup-fitted.json`" \
 > $freeup_analytics_file
