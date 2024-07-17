@@ -2,12 +2,12 @@
 
 usage()
 {
-  echo "Usage: $0 <serial algorithm> <parallel algirithm> <iva> <iva data> <iva data file> <core count file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <speedup analytics file> <freeup analytics file>"
+  echo "Usage: $0 <serial algorithm> <parallel algirithm> <iva> <iva data> <iva data file> <core count file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <energy serial analytics file> <energy parallel analytics file> <speedup analytics file> <freeup analytics file> <powerup analytics file>"
   exit 1
 }
 
-if [ "$#" -ne 13 ]; then
-    echo "Invalid number of parameters. Expected:13 Passed:$#"
+if [ "$#" -ne 15 ]; then
+    echo "Invalid number of parameters. Expected:15 Passed:$#"
     usage
 fi
 
@@ -21,9 +21,11 @@ time_serial_analytics_file=$7
 time_parallel_analytics_file=$8
 space_serial_analytics_file=$9
 space_parallel_analytics_file=${10}
-speedup_analytics_file=${11}
-freeup_analytics_file=${12}
-powerup_analytics_file=${13}
+energy_serial_analytics_file=${11}
+energy_parallel_analytics_file=${12}
+speedup_analytics_file=${13}
+freeup_analytics_file=${14}
+powerup_analytics_file=${15}
 
 serial_measurement=serial.csv
 parallel_measurement=parallel.csv
@@ -33,6 +35,8 @@ rm $time_serial_analytics_file 2> /dev/null
 rm $time_parallel_analytics_file 2> /dev/null
 rm $space_serial_analytics_file 2> /dev/null
 rm $space_parallel_analytics_file 2> /dev/null
+rm $energy_serial_analytics_file 2> /dev/null
+rm $energy_parallel_analytics_file 2> /dev/null
 rm $speedup_analytics_file 2> /dev/null
 rm $freeup_analytics_file 2> /dev/null
 rm $powerup_analytics_file 2> /dev/null
@@ -92,10 +96,11 @@ time_serial=()
 space_serial=()
 time_parallel=()
 space_parallel=()
+energy_serial=()
 energy_parallel=()
 
 while IFS=, read -r i t s p e;
-do iva+=($i) time_serial+=($t) space_serial+=($s);
+do iva+=($i) time_serial+=($t) space_serial+=($s) energy_serial+=($e);
 done < $serial_measurement
 
 while IFS=, read -r i t s p e;
@@ -150,6 +155,10 @@ jo -p iva=$(jo name=$iva_name values=$(jo -a ${iva[@]})) \
 measurements=$(jo -a ${space_serial[@]}) > space-serial.json
 jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
 measurements=$(jo -a ${space_parallel[@]}) > space-parallel.json
+jo -p iva=$(jo name=$iva_name values=$(jo -a ${iva[@]})) \
+measurements=$(jo -a ${energy_serial[@]}) > energy-serial.json
+jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
+measurements=$(jo -a ${energy_parallel[@]}) > energy-parallel.json
 jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
 measurements=$(jo -a ${speedup[@]}) > speedup.json
 jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
@@ -162,6 +171,8 @@ fit.py --in-file time-serial.json --out-file time-serial-fitted.json
 fit.py --in-file time-parallel.json --out-file time-parallel-fitted.json
 fit.py --in-file space-serial.json --out-file space-serial-fitted.json
 fit.py --in-file space-parallel.json --out-file space-parallel-fitted.json
+fit.py --in-file energy-serial.json --out-file energy-serial-fitted.json
+fit.py --in-file energy-parallel.json --out-file energy-parallel-fitted.json
 fit.py --in-file speedup.json --out-file speedup-fitted.json
 fit.py --in-file freeup.json --out-file freeup-fitted.json
 fit.py --in-file powerup.json --out-file powerup-fitted.json
@@ -201,6 +212,24 @@ predictions=$(jo data="`jq '.fitted_measurements' space-parallel-fitted.json`" n
 polynomial="`jq '.polynomial' space-parallel-fitted.json`" \
 maxError="`jq '.max_error' space-parallel-fitted.json`" \
 > $space_parallel_analytics_file
+
+# energy serial
+jo -p \
+iva=$(jo data=$(jo -a ${iva[@]}) name=$iva_name unit=size) \
+measurements=$(jo data=$(jo -a ${energy_serial[@]}) name=energy unit="watt-seconds") \
+predictions=$(jo data="`jq '.fitted_measurements' energy-serial-fitted.json`" name=energy unit="watt-seconds") \
+polynomial="`jq '.polynomial' energy-serial-fitted.json`" \
+maxError="`jq '.max_error' energy-serial-fitted.json`" \
+> $energy_serial_analytics_file
+
+# energy parallel
+jo -p \
+iva=$(jo data=$(jo -a ${core[@]}) name=core unit=count) \
+measurements=$(jo data=$(jo -a ${energy_parallel[@]}) name=energy unit="watt-seconds") \
+predictions=$(jo data="`jq '.fitted_measurements' energy-parallel-fitted.json`" name=energy unit="watt-seconds") \
+polynomial="`jq '.polynomial' energy-parallel-fitted.json`" \
+maxError="`jq '.max_error' energy-parallel-fitted.json`" \
+> $energy_parallel_analytics_file
 
 # speedup
 jo -p \

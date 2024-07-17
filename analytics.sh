@@ -1,2 +1,2 @@
-./analyze.sh main_serial main_parallel iterations 64000 data.txt core.txt time-serial-analytics.json time-parallel-analytics.json space-serial-analytics.json space-parallel-analytics.json speedup-analytics.json freeup-analytics.json powerup-analytics.json
+./analyze.sh main_serial main_parallel iterations 64000 data.txt core.txt time-serial-analytics.json time-parallel-analytics.json space-serial-analytics.json space-parallel-analytics.json energy-serial-analytics.json energy-parallel-analytics.json speedup-analytics.json freeup-analytics.json powerup-analytics.json
 
