@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
+#include <thpool.h>
 
 // ---- thread management code start ----
 
@@ -12,7 +12,7 @@ struct SquareTimeData{
 
 double square_time(int iterations, int iterationsStart, int iterationsEnd);
 
-void * square_time_wrapper(void * data){
+void worker(void * data){
   int iterations      = ((struct SquareTimeData *)data)->iterations;
   int iterationsStart = ((struct SquareTimeData *)data)->iterationsStart;
   int iterationsEnd   = ((struct SquareTimeData *)data)->iterationsEnd;
@@ -20,9 +20,7 @@ void * square_time_wrapper(void * data){
   square_time(iterations, iterationsStart, iterationsEnd);
 }
 
-void square_time_parallel(int iterations, int core){
-
-  pthread_t tid[core];
+void square_time_parallel(int iterations, int core, threadpool thpool){
 
   for(int i=0;i<core;i++){
     struct SquareTimeData * data = (struct SquareTimeData *)malloc(sizeof(struct SquareTimeData));
@@ -30,12 +28,10 @@ void square_time_parallel(int iterations, int core){
     data->iterationsStart = (iterations/core) * i;
     data->iterationsEnd   = (iterations/core) * (i+1);
 
-    pthread_create(&tid[i], NULL, square_time_wrapper, (void *)data);
+    thpool_add_work(thpool, worker, (void *)data);
   }
 
-  for(int i=0;i<core;i++){
-    pthread_join(tid[i], NULL);
-  }
+  thpool_wait(thpool);
 }
 // ---- thread management code end ----
 
@@ -64,9 +60,14 @@ int main (int argc, char *argv[]){
   int iterations = atoi(argv[1]);
   int core       = atoi(argv[2]);
 
+  // thread pool
+  threadpool thpool = thpool_init(core);
+
   printf("iterations = %d, core = %d\n", iterations, core);
 
-  square_time_parallel(iterations, core);
+  square_time_parallel(iterations, core, thpool);
+
+  thpool_destroy(thpool);
 
   return 0;
 }
