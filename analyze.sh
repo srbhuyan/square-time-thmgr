@@ -93,8 +93,8 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Time Analysis\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Space Analysis\",\
+  echo "{\"currentStep\":\"Serial Time Measurement\",\"endTime\":\"\",\
+  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Serial Memory Measurement\",\
   \"progress\":$progress,\"repo\":\"$repo\",\
   \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
 done
@@ -112,8 +112,8 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Memory Analysis\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Power Analysis\",\
+  echo "{\"currentStep\":\"Serial Memory Measurement\",\"endTime\":\"\",\
+  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Serial Power Measurement\",\
   \"progress\":$progress,\"repo\":\"$repo\",\
   \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
 done
@@ -129,8 +129,8 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Power Analysis\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Multicore Performance Analysis\",\
+  echo "{\"currentStep\":\"Serial Power Measurement\",\"endTime\":\"\",\
+  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Parallel Time Measurement\",\
   \"progress\":$progress,\"repo\":\"$repo\",\
   \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
 done
@@ -168,8 +168,8 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Multicore Performance Analysis\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Predictive Model Generation\",\
+  echo "{\"currentStep\":\"Parallel Time Measurement\",\"endTime\":\"\",\
+  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Parallel Memory Measurement\",\
   \"progress\":$progress,\"repo\":\"$repo\",\
   \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
 done
@@ -187,8 +187,8 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Multicore Performance Analysis\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Predictive Model Generation\",\
+  echo "{\"currentStep\":\"Parallel Memory Measurement\",\"endTime\":\"\",\
+  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Parallel Power Measurement\",\
   \"progress\":$progress,\"repo\":\"$repo\",\
   \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
 done
@@ -204,8 +204,8 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Multicore Performance Analysis\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Predictive Model Generation\",\
+  echo "{\"currentStep\":\"Parallel Power Measurement\",\"endTime\":\"\",\
+  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Serial Polynomial Generation\",\
   \"progress\":$progress,\"repo\":\"$repo\",\
   \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
 done
@@ -296,7 +296,7 @@ jo -p iva=$(jo name=core values=$(jo -a ${core[@]})) \
 measurements=$(jo -a ${energyup[@]}) > energyup.json
 
 # curve fitting
-progress_bandwidth=20
+progress_bandwidth=10
 fit_count=12
 
 fit.py --in-file time-serial.json --out-file time-serial-fitted.json
