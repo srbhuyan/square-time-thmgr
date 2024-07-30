@@ -2,12 +2,12 @@
 
 usage()
 {
-  echo "Usage: $0 <serial algorithm> <parallel algirithm> <iva> <iva data> <iva data file> <core count file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <power serial analytics file> <power parallel analytics file> <energy serial analytics file> <energy parallel analytics file> <speedup analytics file> <freeup analytics file> <powerup analytics file> <energyup analytics file> <id> <repo> <start time> <progress>"
+  echo "Usage: $0 <serial algorithm> <parallel algirithm> <iva> <iva data> <iva data file> <core count file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <power serial analytics file> <power parallel analytics file> <energy serial analytics file> <energy parallel analytics file> <speedup analytics file> <freeup analytics file> <powerup analytics file> <energyup analytics file> <id> <repo> <repo name> <start time> <progress>"
   exit 1
 }
 
-if [ "$#" -ne 22 ]; then
-    echo "Invalid number of parameters. Expected:22 Passed:$#"
+if [ "$#" -ne 23 ]; then
+    echo "Invalid number of parameters. Expected:23 Passed:$#"
     usage
 fi
 
@@ -31,8 +31,9 @@ powerup_analytics_file=${17}
 energyup_analytics_file=${18}
 id=${19}
 repo=${20}
-start_time=${21}
-progress=${22}
+repo_name=${21};
+start_time=${22}
+progress=${23}
 
 serial_measurement=serial.csv
 parallel_measurement=parallel.csv
@@ -93,10 +94,10 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Serial Time Measurement\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Serial Memory Measurement\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Serial Time Measurement\",\
+  \"nextStep\":\"Serial Memory Measurement\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 done
 
 # memory - serial
@@ -112,10 +113,11 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Serial Memory Measurement\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Serial Power Measurement\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Serial Memory Measurement\",\
+  \"nextStep\":\"Serial Power Measurement\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
+
 done
 
 # power - serial
@@ -129,10 +131,11 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Serial Power Measurement\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Parallel Time Measurement\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Serial Power Measurement\",\
+  \"nextStep\":\"Parallel Time Measurement\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
+
 done
 
 # energy - serial
@@ -168,10 +171,11 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Parallel Time Measurement\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Parallel Memory Measurement\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Parallel Time Measurement\",\
+  \"nextStep\":\"Parallel Memory Measurement\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
+
 done
 
 # memory - parallel
@@ -187,10 +191,11 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Parallel Memory Measurement\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Parallel Power Measurement\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Parallel Memory Measurement\",\
+  \"nextStep\":\"Parallel Power Measurement\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
+
 done
 
 # power - parallel
@@ -204,10 +209,10 @@ do
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Parallel Power Measurement\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"Serial Polynomial Generation\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Parallel Power Measurement\",\
+  \"nextStep\":\"Predictive Model Generation\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 done
 
 # energy - parallel
@@ -303,109 +308,109 @@ fit.py --in-file time-serial.json --out-file time-serial-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file time-parallel.json --out-file time-parallel-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file space-serial.json --out-file space-serial-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file space-parallel.json --out-file space-parallel-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file power-serial.json --out-file power-serial-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file power-parallel.json --out-file power-parallel-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file energy-serial.json --out-file energy-serial-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file energy-parallel.json --out-file energy-parallel-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file speedup.json --out-file speedup-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file freeup.json --out-file freeup-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file powerup.json --out-file powerup-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 fit.py --in-file energyup.json --out-file energyup-fitted.json
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
-  echo "{\"currentStep\":\"Predictive Model Generation\",\"endTime\":\"\",\
-  \"errorCode\":0,\"id\":\"$id\",\"message\":\"\",\"nextStep\":\"None\",\
-  \"progress\":$progress,\"repo\":\"$repo\",\
-  \"startTime\":\"$start_time\",\"status\":\"In progress\"}" > $analysis_file
+  echo "{\"id\":\"$id\",\"repo\":\"$repo\",\"repoName\":\"$repo_name\",\"startTime\":\"$start_time\",\
+  \"endTime\":\"\",\"status\":\"In progress\",\"progress\":{\"currentStep\":\"Predictive Model Generation\",\
+  \"nextStep\":\"None\",\"percent\":$progress},\
+  \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
 # time serial
 jo -p \
