@@ -31,7 +31,7 @@ powerup_analytics_file=${17}
 energyup_analytics_file=${18}
 id=${19}
 repo=${20}
-repo_name=${21};
+repo_name=${21}
 start_time=${22}
 progress=${23}
 
@@ -419,6 +419,7 @@ measurements=$(jo data=$(jo -a ${time_serial[@]}) name=time unit=seconds) \
 predictions=$(jo data="`jq '.fitted_measurements' time-serial-fitted.json`" name=time unit=seconds) \
 polynomial="`jq '.polynomial' time-serial-fitted.json`" \
 maxError="`jq '.max_error' time-serial-fitted.json`" \
+rSquared="`jq '.r_squared' time-serial-fitted.json`" \
 > $time_serial_analytics_file
 
 # time parallel
@@ -428,6 +429,7 @@ measurements=$(jo data=$(jo -a ${time_parallel[@]}) name=time unit=seconds) \
 predictions=$(jo data="`jq '.fitted_measurements' time-parallel-fitted.json`" name=time unit=seconds) \
 polynomial="`jq '.polynomial' time-parallel-fitted.json`" \
 maxError="`jq '.max_error' time-parallel-fitted.json`" \
+rSquared="`jq '.r_squared' time-parallel-fitted.json`" \
 > $time_parallel_analytics_file
 
 # memory serial
@@ -437,6 +439,7 @@ measurements=$(jo data=$(jo -a ${space_serial[@]}) name=memory unit=MB) \
 predictions=$(jo data="`jq '.fitted_measurements' space-serial-fitted.json`" name=memory unit=MB) \
 polynomial="`jq '.polynomial' space-serial-fitted.json`" \
 maxError="`jq '.max_error' space-serial-fitted.json`" \
+rSquared="`jq '.r_squared' space-serial-fitted.json`" \
 > $space_serial_analytics_file
 
 # memory parallel
@@ -446,6 +449,7 @@ measurements=$(jo data=$(jo -a ${space_parallel[@]}) name=memory unit=MB) \
 predictions=$(jo data="`jq '.fitted_measurements' space-parallel-fitted.json`" name=memory unit=MB) \
 polynomial="`jq '.polynomial' space-parallel-fitted.json`" \
 maxError="`jq '.max_error' space-parallel-fitted.json`" \
+rSquared="`jq '.r_squared' space-parallel-fitted.json`" \
 > $space_parallel_analytics_file
 
 # power serial
@@ -455,6 +459,7 @@ measurements=$(jo data=$(jo -a ${power_serial[@]}) name=power unit="watts") \
 predictions=$(jo data="`jq '.fitted_measurements' power-serial-fitted.json`" name=power unit="watts") \
 polynomial="`jq '.polynomial' power-serial-fitted.json`" \
 maxError="`jq '.max_error' power-serial-fitted.json`" \
+rSquared="`jq '.r_squared' power-serial-fitted.json`" \
 > $power_serial_analytics_file
 
 # power parallel
@@ -464,6 +469,7 @@ measurements=$(jo data=$(jo -a ${power_parallel[@]}) name=power unit="watts") \
 predictions=$(jo data="`jq '.fitted_measurements' power-parallel-fitted.json`" name=power unit="watts") \
 polynomial="`jq '.polynomial' power-parallel-fitted.json`" \
 maxError="`jq '.max_error' power-parallel-fitted.json`" \
+rSquared="`jq '.r_squared' power-parallel-fitted.json`" \
 > $power_parallel_analytics_file
 
 # energy serial
@@ -473,6 +479,7 @@ measurements=$(jo data=$(jo -a ${energy_serial[@]}) name=energy unit="watt-secon
 predictions=$(jo data="`jq '.fitted_measurements' energy-serial-fitted.json`" name=energy unit="watt-seconds") \
 polynomial="`jq '.polynomial' energy-serial-fitted.json`" \
 maxError="`jq '.max_error' energy-serial-fitted.json`" \
+rSquared="`jq '.r_squared' energy-serial-fitted.json`" \
 > $energy_serial_analytics_file
 
 # energy parallel
@@ -482,6 +489,7 @@ measurements=$(jo data=$(jo -a ${energy_parallel[@]}) name=energy unit="watt-sec
 predictions=$(jo data="`jq '.fitted_measurements' energy-parallel-fitted.json`" name=energy unit="watt-seconds") \
 polynomial="`jq '.polynomial' energy-parallel-fitted.json`" \
 maxError="`jq '.max_error' energy-parallel-fitted.json`" \
+rSquared="`jq '.r_squared' energy-parallel-fitted.json`" \
 > $energy_parallel_analytics_file
 
 # speedup
@@ -491,6 +499,7 @@ measurements=$(jo data=$(jo -a ${speedup[@]}) name='T1/Tcore' unit='') \
 predictions=$(jo data="`jq '.fitted_measurements' speedup-fitted.json`" name='T1/Tcore' unit='') \
 polynomial="`jq '.polynomial' speedup-fitted.json`" \
 maxError="`jq '.max_error' speedup-fitted.json`" \
+rSquared="`jq '.r_squared' speedup-fitted.json`" \
 > $speedup_analytics_file
 
 # freeup
@@ -500,6 +509,7 @@ measurements=$(jo data=$(jo -a ${freeup[@]}) name='S1/Score' unit='') \
 predictions=$(jo data="`jq '.fitted_measurements' freeup-fitted.json`" name='S1/Score' unit='') \
 polynomial="`jq '.polynomial' freeup-fitted.json`" \
 maxError="`jq '.max_error' freeup-fitted.json`" \
+r_squared="`jq '.r_squared' freeup-fitted.json`" \
 > $freeup_analytics_file
 
 # powerup
@@ -509,6 +519,7 @@ measurements=$(jo data=$(jo -a ${powerup[@]}) name='P1/Pcore' unit='') \
 predictions=$(jo data="`jq '.fitted_measurements' powerup-fitted.json`" name='P1/Pcore' unit='') \
 polynomial="`jq '.polynomial' powerup-fitted.json`" \
 maxError="`jq '.max_error' powerup-fitted.json`" \
+rSquared="`jq '.r_squared' powerup-fitted.json`" \
 > $powerup_analytics_file
 
 # energyup
@@ -518,5 +529,6 @@ measurements=$(jo data=$(jo -a ${energyup[@]}) name='E1/Ecore' unit='') \
 predictions=$(jo data="`jq '.fitted_measurements' energyup-fitted.json`" name='E1/Ecore' unit='') \
 polynomial="`jq '.polynomial' energyup-fitted.json`" \
 maxError="`jq '.max_error' energyup-fitted.json`" \
+rSquared="`jq '.r_squared' energyup-fitted.json`" \
 > $energyup_analytics_file
 
