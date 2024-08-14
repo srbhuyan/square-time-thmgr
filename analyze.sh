@@ -2,12 +2,12 @@
 
 usage()
 {
-  echo "Usage: $0 <serial algorithm> <parallel algirithm> <iva> <iva data> <iva data file> <core count file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <power serial analytics file> <power parallel analytics file> <energy serial analytics file> <energy parallel analytics file> <speedup analytics file> <freeup analytics file> <powerup analytics file> <energyup analytics file> <id> <repo> <repo name> <start time> <progress>"
+  echo "Usage: $0 <serial algorithm> <parallel algirithm> <iva> <iva data> <iva data file> <core count file> <power profile file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <power serial analytics file> <power parallel analytics file> <energy serial analytics file> <energy parallel analytics file> <speedup analytics file> <freeup analytics file> <powerup analytics file> <energyup analytics file> <id> <repo> <repo name> <start time> <progress>"
   exit 1
 }
 
-if [ "$#" -ne 23 ]; then
-    echo "Invalid number of parameters. Expected:23 Passed:$#"
+if [ "$#" -ne 24 ]; then
+    echo "Invalid number of parameters. Expected:24 Passed:$#"
     usage
 fi
 
@@ -17,23 +17,24 @@ iva_name=$3
 iva_data=$4
 iva_data_file=$5
 core_count_file=$6
-time_serial_analytics_file=$7
-time_parallel_analytics_file=$8
-space_serial_analytics_file=$9
-space_parallel_analytics_file=${10}
-power_serial_analytics_file=${11}
-power_parallel_analytics_file=${12}
-energy_serial_analytics_file=${13}
-energy_parallel_analytics_file=${14}
-speedup_analytics_file=${15}
-freeup_analytics_file=${16}
-powerup_analytics_file=${17}
-energyup_analytics_file=${18}
-id=${19}
-repo=${20}
-repo_name=${21}
-start_time=${22}
-progress=${23}
+power_profile_file=$7
+time_serial_analytics_file=$8
+time_parallel_analytics_file=$9
+space_serial_analytics_file=${10}
+space_parallel_analytics_file=${11}
+power_serial_analytics_file=${12}
+power_parallel_analytics_file=${13}
+energy_serial_analytics_file=${14}
+energy_parallel_analytics_file=${15}
+speedup_analytics_file=${16}
+freeup_analytics_file=${17}
+powerup_analytics_file=${18}
+energyup_analytics_file=${19}
+id=${20}
+repo=${21}
+repo_name=${22}
+start_time=${23}
+progress=${24}
 
 serial_measurement=serial.csv
 parallel_measurement=parallel.csv
@@ -57,6 +58,12 @@ rm $parallel_measurement 2> /dev/null
 
 readarray -t iva_arr  < $iva_data_file
 readarray -t core_arr < $core_count_file
+
+power_profile=()
+
+while IFS=, read -r i p;
+do power_profile+=($p);
+done < $power_profile_file
 
 iva=()
 core=()
@@ -126,8 +133,7 @@ progress_bandwidth=10
 for i in ${iva[@]}
 do
   # power
-  ./$serial_algo $i && \
-  power_serial+=(`ipmimonitoring | grep "PW consumption" | awk '{print $13}'`);
+  power_serial+=(${power_profile[0]})
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
 
@@ -204,8 +210,7 @@ progress_bandwidth=10
 for i in ${core[@]}
 do
   # power
-  ./$parallel_algo $iva_data $i && \
-  power_parallel+=(`ipmimonitoring | grep "PW consumption" | awk '{print $13}'`);
+  power_parallel+=(${power_profile[i-1]})
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
 

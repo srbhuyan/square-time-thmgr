@@ -5,4 +5,5 @@ main_parallel
 *.csv
 *.pdf
 *.json
+!power-profile.csv
 
