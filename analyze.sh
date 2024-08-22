@@ -354,7 +354,7 @@ fit.py --in-file power-serial.json --out-file power-serial-fitted.json
   \"nextStep\":\"None\",\"percent\":$progress},\
   \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
-fit.py --in-file power-parallel.json --out-file power-parallel-fitted.json
+fit.py --in-file power-parallel.json --out-file power-parallel-fitted.json --error-threshold 2
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
@@ -372,7 +372,7 @@ fit.py --in-file energy-serial.json --out-file energy-serial-fitted.json
   \"nextStep\":\"None\",\"percent\":$progress},\
   \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
-fit.py --in-file energy-parallel.json --out-file energy-parallel-fitted.json
+fit.py --in-file energy-parallel.json --out-file energy-parallel-fitted.json --error-threshold 2
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
@@ -381,7 +381,7 @@ fit.py --in-file energy-parallel.json --out-file energy-parallel-fitted.json
   \"nextStep\":\"None\",\"percent\":$progress},\
   \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
-fit.py --in-file speedup.json --out-file speedup-fitted.json
+fit.py --in-file speedup.json --out-file speedup-fitted.json --error-threshold 2
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
@@ -408,7 +408,7 @@ fit.py --in-file powerup.json --out-file powerup-fitted.json
   \"nextStep\":\"None\",\"percent\":$progress},\
   \"result\":{\"errorCode\":0,\"message\":\"\",\"repo\":\"\"}}" > $analysis_file
 
-fit.py --in-file energyup.json --out-file energyup-fitted.json
+fit.py --in-file energyup.json --out-file energyup-fitted.json --error-threshold 2
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=$fit_count; p + (bw/l)" | bc -l`
 
