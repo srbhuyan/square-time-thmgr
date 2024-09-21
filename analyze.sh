@@ -40,6 +40,17 @@ serial_measurement=serial.csv
 parallel_measurement=parallel.csv
 analysis_file=analysis.json
 
+# parallel code generation config
+parallel_plugin_so=MyRewriter.so
+parallel_plugin_name=rew
+main_serial=main_serial.c
+main_parallel=main_parallel.c
+target_function=square_time
+iva_name=iterations
+iva_start=iterationsStart
+iva_end=iterationsEnd
+argc=1
+
 # cleanup
 rm $time_serial_analytics_file 2> /dev/null
 rm $time_parallel_analytics_file 2> /dev/null
@@ -77,6 +88,9 @@ for i in ${core_arr[@]}
 do
   core+=($i)
 done
+
+# generate TALP parallel code
+clang -fplugin=$parallel_plugin_so -Xclang -plugin -Xclang $parallel_plugin_name -Xclang -plugin-arg-rew -Xclang -target-function -Xclang -plugin-arg-rew -Xclang $target_function -Xclang -plugin-arg-rew -Xclang -out-file -Xclang -plugin-arg-rew -Xclang $main_parallel -Xclang -plugin-arg-rew -Xclang -iva -Xclang -plugin-arg-rew -Xclang $iva_name -Xclang -plugin-arg-rew -Xclang -iva-start -Xclang -plugin-arg-rew -Xclang $iva_start -Xclang -plugin-arg-rew -Xclang -iva-end -Xclang -plugin-arg-rew -Xclang $iva_end -Xclang -plugin-arg-rew -Xclang -argc -Xclang -plugin-arg-rew -Xclang $argc -c $main_serial
 
 # make
 make
