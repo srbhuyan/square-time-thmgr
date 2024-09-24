@@ -2,39 +2,44 @@
 
 usage()
 {
-  echo "Usage: $0 <serial algorithm> <parallel algirithm> <iva> <iva data> <iva data file> <core count file> <power profile file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <power serial analytics file> <power parallel analytics file> <energy serial analytics file> <energy parallel analytics file> <speedup analytics file> <freeup analytics file> <powerup analytics file> <energyup analytics file> <id> <repo> <repo name> <start time> <progress>"
+  echo "Usage: $0 <algorithm> <iva> <iva data> <iva data file> <core count file> <power profile file> <time serial analytics file> <time parallel analytics file> <space serial analytics file> <space parallel analytics file> <power serial analytics file> <power parallel analytics file> <energy serial analytics file> <energy parallel analytics file> <speedup analytics file> <freeup analytics file> <powerup analytics file> <energyup analytics file> <id> <repo> <repo name> <start time> <progress>"
   exit 1
 }
 
-if [ "$#" -ne 24 ]; then
-    echo "Invalid number of parameters. Expected:24 Passed:$#"
+if [ "$#" -ne 29 ]; then
+    echo "Invalid number of parameters. Expected:29 Passed:$#"
     usage
 fi
 
-serial_algo=$1
-parallel_algo=$2
-iva_name=$3
-iva_data=$4
-iva_data_file=$5
-core_count_file=$6
-power_profile_file=$7
-time_serial_analytics_file=$8
-time_parallel_analytics_file=$9
-space_serial_analytics_file=${10}
-space_parallel_analytics_file=${11}
-power_serial_analytics_file=${12}
-power_parallel_analytics_file=${13}
-energy_serial_analytics_file=${14}
-energy_parallel_analytics_file=${15}
-speedup_analytics_file=${16}
-freeup_analytics_file=${17}
-powerup_analytics_file=${18}
-energyup_analytics_file=${19}
-id=${20}
-repo=${21}
-repo_name=${22}
-start_time=${23}
-progress=${24}
+algo=$1
+main_file=$2
+target_fn=$3
+target_fn_iva_name=$4
+target_fn_iva_start=$5
+target_fn_iva_end=$6
+argc=$7
+iva_name=$8
+iva_data=$9
+iva_data_file=${10}
+core_count_file=${11}
+power_profile_file=${12}
+time_serial_analytics_file=${13}
+time_parallel_analytics_file=${14}
+space_serial_analytics_file=${15}
+space_parallel_analytics_file=${16}
+power_serial_analytics_file=${17}
+power_parallel_analytics_file=${18}
+energy_serial_analytics_file=${19}
+energy_parallel_analytics_file=${20}
+speedup_analytics_file=${21}
+freeup_analytics_file=${22}
+powerup_analytics_file=${23}
+energyup_analytics_file=${24}
+id=${25}
+repo=${26}
+repo_name=${27}
+start_time=${28}
+progress=${29}
 
 serial_measurement=serial.csv
 parallel_measurement=parallel.csv
@@ -43,13 +48,6 @@ analysis_file=analysis.json
 # parallel code generation config
 parallel_plugin_so=MyRewriter.so
 parallel_plugin_name=rew
-main_serial=main_serial.c
-main_parallel=main_parallel.c
-target_function=square_time
-iva_name=iterations
-iva_start=iterationsStart
-iva_end=iterationsEnd
-argc=1
 
 # cleanup
 rm $time_serial_analytics_file 2> /dev/null
@@ -89,11 +87,18 @@ do
   core+=($i)
 done
 
-# generate TALP parallel code
-clang -fplugin=$parallel_plugin_so -Xclang -plugin -Xclang $parallel_plugin_name -Xclang -plugin-arg-rew -Xclang -target-function -Xclang -plugin-arg-rew -Xclang $target_function -Xclang -plugin-arg-rew -Xclang -out-file -Xclang -plugin-arg-rew -Xclang $main_parallel -Xclang -plugin-arg-rew -Xclang -iva -Xclang -plugin-arg-rew -Xclang $iva_name -Xclang -plugin-arg-rew -Xclang -iva-start -Xclang -plugin-arg-rew -Xclang $iva_start -Xclang -plugin-arg-rew -Xclang -iva-end -Xclang -plugin-arg-rew -Xclang $iva_end -Xclang -plugin-arg-rew -Xclang -argc -Xclang -plugin-arg-rew -Xclang $argc -c $main_serial
+# make - serial
+make -f Makefile-serial
 
-# make
-make
+# make a copy of original execuatble
+algo_orig="$algo"_original
+mv $algo $algo_orig
+
+# generate TALP parallel code
+clang -fplugin=$parallel_plugin_so -Xclang -plugin -Xclang $parallel_plugin_name -Xclang -plugin-arg-rew -Xclang -target-function -Xclang -plugin-arg-rew -Xclang $target_fn -Xclang -plugin-arg-rew -Xclang -out-file -Xclang -plugin-arg-rew -Xclang $main_file -Xclang -plugin-arg-rew -Xclang -iva -Xclang -plugin-arg-rew -Xclang $target_fn_iva_name -Xclang -plugin-arg-rew -Xclang -iva-start -Xclang -plugin-arg-rew -Xclang $target_fn_iva_start -Xclang -plugin-arg-rew -Xclang -iva-end -Xclang -plugin-arg-rew -Xclang $target_fn_iva_end -Xclang -plugin-arg-rew -Xclang -argc -Xclang -plugin-arg-rew -Xclang $argc -c $main_file
+
+# make - parallel
+make -f Makefile-parallel
 
 # serial run
 
@@ -109,7 +114,7 @@ for i in ${iva[@]}
 do
   # time
   start=`date +%s.%N`;\
-  ./$serial_algo $i;\
+  ./$algo_orig $i;\
   end=`date +%s.%N`;\
   time_serial+=(`printf '%.8f' $( echo "$end - $start" | bc -l )`);
 
@@ -128,8 +133,8 @@ count=1
 for i in ${iva[@]}
 do
   # memory
-  heaptrack -o "$serial_algo.$count" ./$serial_algo $i;\
-  space_serial+=(`heaptrack --analyze "$serial_algo.$count.zst"  | grep "peak heap memory consumption" | awk '{print $5}'`);
+  heaptrack -o "$algo.$count" ./$algo_orig $i;\
+  space_serial+=(`heaptrack --analyze "$algo.$count.zst"  | grep "peak heap memory consumption" | awk '{print $5}'`);
   count=$((count+1))
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#iva[@]}; p + (bw/l)" | bc -l`
@@ -185,7 +190,7 @@ for i in ${core[@]}
 do
   # time
   start=`date +%s.%N`;\
-  ./$parallel_algo $iva_data $i;\
+  ./$algo $iva_data $i;\
   end=`date +%s.%N`;\
   time_parallel+=(`printf '%.8f' $( echo "$end - $start" | bc -l )`);
 
@@ -205,8 +210,8 @@ count=1
 for i in ${core[@]}
 do
   # memory
-  heaptrack -o "$parallel_algo.$count" ./$parallel_algo $iva_data $i;\
-  space_parallel+=(`heaptrack --analyze "$parallel_algo.$count.zst"  | grep "peak heap memory consumption" | awk '{print $5}'`);
+  heaptrack -o "$algo.$count" ./$algo $iva_data $i;\
+  space_parallel+=(`heaptrack --analyze "$algo.$count.zst"  | grep "peak heap memory consumption" | awk '{print $5}'`);
   count=$((count+1))
 
   progress=`echo "scale=1; p=$progress; bw=$progress_bandwidth; l=${#core[@]}; p + (bw/l)" | bc -l`
