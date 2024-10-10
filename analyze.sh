@@ -47,7 +47,7 @@ analysis_file=analysis.json
 
 # fit for max polynomial degress of 4 and 10
 # adding more values will generate more fittings
-poly_max_degree_vals=(4 10)
+poly_max_degree_vals=(1 2 3 4 5 6 7 8 9 10)
 
 # parallel code generation config
 parallel_plugin_so=MyRewriter.so
